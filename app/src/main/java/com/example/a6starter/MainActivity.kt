@@ -6,11 +6,13 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.a6starter.ui.navigationEventRepository
 import com.example.a6starter.ui.screens.main.MainScreen
 import com.example.a6starter.ui.screens.main.OtherScreen
 import com.example.a6starter.ui.screens.main.Screen
@@ -23,7 +25,21 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            val navigationEventRepository = navigationEventRepository()
             val navController = rememberNavController()
+
+            /*
+            Debatable: perhaps we should have an abstract class for a repository,
+            that has a repository state and an event flow sort of like for a ViewModel,
+            then we could make an EventHandler composable that could consume this to avoid
+            having to write out LaunchedEffect for each repository we want to watch.
+             */
+            LaunchedEffect(Unit) {
+                navigationEventRepository.navigationEventsFlow.collect {
+                    navController.navigate(it)
+                }
+            }
+
             A6StarterTheme {
                 NavHost(navController, Screen.HomeScreen) {
                     composable<Screen.HomeScreen> {

@@ -1,6 +1,7 @@
 package com.example.a6starter.ui.screens.main
 
 import androidx.lifecycle.viewModelScope
+import com.example.a6starter.ui.NavigationEventRepository
 import com.example.a6starter.ui.viewmodel.BaseViewModel
 import com.example.a6starter.ui.viewmodel.ViewModelEffect
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,12 +14,12 @@ data class MainScreenViewState(
 )
 
 sealed class MainScreenViewModelEffect : ViewModelEffect {
-    data object Navigate : MainScreenViewModelEffect()
     data class Error(val text: String) : MainScreenViewModelEffect()
 }
 
 @HiltViewModel
 class MainScreenViewModel @Inject constructor(
+    private val navigationEventRepository: NavigationEventRepository,
 ) : BaseViewModel<MainScreenViewState, MainScreenViewModelEffect>(MainScreenViewState()) {
 
     fun signIn() = viewModelScope.launch {
@@ -27,7 +28,7 @@ class MainScreenViewModel @Inject constructor(
         if (Math.random() < .5) {
             effect(MainScreenViewModelEffect.Error("Unlucky"))
         } else {
-            effect(MainScreenViewModelEffect.Navigate)
+            navigationEventRepository.sendNavigationEvent(Screen.OtherScreen)
         }
         applyMutation { copy(isButtonLoading = false) }
     }

@@ -32,7 +32,6 @@ fun MainScreen(
 
     EffectHandler(viewModel.effectFlow) {
         when (it) {
-            is MainScreenViewModelEffect.Navigate -> navigateToOtherScreen()
             is MainScreenViewModelEffect.Error -> coroutineScope.launch {
                 snackbarHostState.showSnackbar(it.text)
             }
