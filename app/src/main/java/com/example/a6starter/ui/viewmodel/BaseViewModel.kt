@@ -5,23 +5,18 @@ import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 interface ViewModelEffect
 
-abstract class BaseViewModel<UiState, Effect : ViewModelEffect>(initialUiState: UiState) :
+abstract class BaseViewModel<UiState>(initialUiState: UiState) :
     ViewModel() {
 
     private val _uiStateFlow = MutableStateFlow(initialUiState)
     val uiStateFlow: StateFlow<UiState> = _uiStateFlow.asStateFlow()
-
-    private val _effectFlow = Channel<Effect>()
-    val effectFlow = _effectFlow.receiveAsFlow()
 
     @Composable
     fun collectUiStateValue(): UiState = uiStateFlow.collectAsState().value
@@ -36,23 +31,6 @@ abstract class BaseViewModel<UiState, Effect : ViewModelEffect>(initialUiState: 
      */
     protected fun applyMutation(mutation: UiState.() -> UiState) {
         _uiStateFlow.value = _uiStateFlow.value.mutation()
-    }
-
-    /**
-     * Sends an effect to the effect flow asynchronously in ViewModelScope
-     */
-    protected fun effectAsync(effect: Effect) {
-        viewModelScope.launch {
-            _effectFlow.send(effect)
-        }
-    }
-
-    /**
-     * Sends an effect to the effect flow, and blocks until the effect is received.
-     * Can be helpful to guarantee that the effect was received
-     */
-    protected suspend fun effect(effect: Effect) {
-        _effectFlow.send(effect)
     }
 
     /**
