@@ -1,2 +1,2 @@
-# a6-starter
-The starter code for assignment 6 of Intro to Android Development
+# Effect Handler Demo
+Demo for Effect Handlers in Compose

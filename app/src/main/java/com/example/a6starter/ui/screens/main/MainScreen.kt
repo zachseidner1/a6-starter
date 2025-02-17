@@ -1,52 +1,55 @@
 package com.example.a6starter.ui.screens.main
 
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-
-private const val LOADING_KEY = "LOADING"
+import com.example.a6starter.ui.viewmodel.EffectHandler
+import kotlinx.coroutines.launch
 
 @Composable
-fun MainScreen(viewModel: MainScreenViewModel = hiltViewModel()) {
-    Text(
-        "TODO: Create your main screen here, note that you can access the viewModel from " +
-                "the composable parameter ($viewModel)"
-    )
-    val lazyListState = rememberLazyListState()
-    // To see when we need to load more data, we create a stateful variable based on the lazy list
-    //  state. It is true if our loading circle is visible.
-    val loadingCircleVisible by remember {
-        derivedStateOf {
-            lazyListState.layoutInfo.visibleItemsInfo.any { it.key == LOADING_KEY }
-        }
-    }
+fun MainScreen(
+    navigateToOtherScreen: () -> Unit,
+    viewModel: MainScreenViewModel = hiltViewModel()
+) = CenteredScreen {
+    val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
+    val uiState = viewModel.collectUiStateValue()
 
-    LaunchedEffect(Unit) {
-        // We then use snapshotFlow to convert this stateful variable into a flow, so this way
-        //  we can observe and react to its changes.
-        snapshotFlow { loadingCircleVisible }.onEach {
-            // TODO call load next page here
-        }.launchIn(coroutineScope)
-    }
-
-    LazyColumn(state = lazyListState) {
-        items(TODO("Add your list items here")) {
-
+    EffectHandler(viewModel.effectFlow) {
+        when (it) {
+            is MainScreenViewModelEffect.Navigate -> navigateToOtherScreen()
+            is MainScreenViewModelEffect.Error -> coroutineScope.launch {
+                snackbarHostState.showSnackbar(it.text)
+            }
         }
-        item(key = LOADING_KEY) {
-            CircularProgressIndicator()
+    }
+    SnackbarHost(hostState = snackbarHostState)
+
+    Button(onClick = { viewModel.signIn() }) {
+        Row(
+            modifier = Modifier.animateContentSize(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (uiState.isButtonLoading) {
+                CircularProgressIndicator(color = Color.White)
+                Spacer(Modifier.width(16.dp))
+            }
+            Text("Login", fontSize = 24.sp)
         }
     }
 }
