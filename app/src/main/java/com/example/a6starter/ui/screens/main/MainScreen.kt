@@ -10,7 +10,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,8 +17,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 
 @Composable
 fun MainScreen(
@@ -29,12 +26,12 @@ fun MainScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val uiState = viewModel.collectUiStateValue()
 
-    LaunchedEffect(Unit) {
-        viewModel.uiStateFlow.onEach {
-            if (it.shouldNavigate) {
+    EffectHandler(viewModel.effectFlow) {
+        when (it) {
+            is MainScreenViewModelEffect.Navigate -> {
                 navigateToOtherScreen()
             }
-        }.launchIn(this)
+        }
     }
 
     SnackbarHost(hostState = snackbarHostState)
