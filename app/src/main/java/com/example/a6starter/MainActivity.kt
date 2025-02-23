@@ -29,12 +29,6 @@ class MainActivity : ComponentActivity() {
             val commonViewModelEffectsRepository = commonViewModelEffectsRepository()
             val navController = rememberNavController()
 
-            /*
-            Debatable: perhaps we should have an abstract class for a repository,
-            that has a repository state and an event flow sort of like for a ViewModel,
-            then we could make an EventHandler composable that could consume this to avoid
-            having to write out LaunchedEffect for each repository we want to watch.
-             */
             CommonViewModelEffectHandler(commonViewModelEffectsRepository.effectsFlow) {
                 when (it) {
                     is CommonViewModelEffect.NavigationEffect -> {
