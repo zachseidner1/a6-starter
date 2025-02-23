@@ -6,13 +6,14 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.a6starter.ui.navigationEventRepository
+import com.example.a6starter.ui.CommonViewModelEffect
+import com.example.a6starter.ui.CommonViewModelEffectHandler
+import com.example.a6starter.ui.commonViewModelEffectsRepository
 import com.example.a6starter.ui.screens.main.MainScreen
 import com.example.a6starter.ui.screens.main.OtherScreen
 import com.example.a6starter.ui.screens.main.Screen
@@ -25,7 +26,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val navigationEventRepository = navigationEventRepository()
+            val commonViewModelEffectsRepository = commonViewModelEffectsRepository()
             val navController = rememberNavController()
 
             /*
@@ -34,9 +35,11 @@ class MainActivity : ComponentActivity() {
             then we could make an EventHandler composable that could consume this to avoid
             having to write out LaunchedEffect for each repository we want to watch.
              */
-            LaunchedEffect(Unit) {
-                navigationEventRepository.navigationEventsFlow.collect {
-                    navController.navigate(it)
+            CommonViewModelEffectHandler(commonViewModelEffectsRepository.effectsFlow) {
+                when (it) {
+                    is CommonViewModelEffect.NavigationEffect -> {
+                        navController.navigate(it.destination)
+                    }
                 }
             }
 
