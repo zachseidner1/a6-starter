@@ -11,8 +11,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import javax.inject.Singleton
 
-// TODO
-private val BASE_URL: String = "https://google.com"
+private val BASE_URL: String =
+    TODO("If your project connects to a backend API, place your base URL here")
 
 /**
  * This is the AppModule. This handles dependency injection with Dagger Hilt for you, so you do not
